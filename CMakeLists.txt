@@ -1,0 +1,8 @@
+cmake_minimum_required (VERSION 2.6)
+SET(CMAKE_CXX_COMPILER clang)
+SET(CMAKE_CXX_FLAGS "-Wall -pedantic -std=c++17 -Wextra -lstdc++" )
+project (main)
+include_directories(inc)
+file(GLOB SOURCES "src/*.cpp")
+add_executable(main.exe ${SOURCES})
+set(EXECUTABLE_OUTPUT_PATH ".")

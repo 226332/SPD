@@ -1,0 +1,10 @@
+*.o
+Makefile
+.cproject
+.project
+.settings
+CMakeFiles
+Debug
+cmake_install.cmake
+CMakeCache.txt
+*.exe
