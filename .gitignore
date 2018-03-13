@@ -10,4 +10,4 @@ CMakeCache.txt
 *.exe
 vsgrbs.*
 *.sln
-**/.vs
+.vs/
