@@ -25,8 +25,7 @@ public:
         auto t2 = std::chrono::high_resolution_clock::now();
         procedure.execute();
         auto t1 = std::chrono::high_resolution_clock::now();
-        t2 = std::chrono::high_resolution_clock::now();
-        printDuration(std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1));
+        printDuration(std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t2));
     }
 };
 

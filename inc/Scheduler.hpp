@@ -7,13 +7,17 @@ public:
     virtual ~IScheduler() = default;
     virtual Tasks schedule(Tasks tasks) = 0;
 };
+class SchedulerFactory {
+public:
+    std::unique_ptr<IScheduler> createScheduler(std::string schedulerName);
+};
 
-class SortR: IScheduler {
+class SortR: public IScheduler {
 public:
     Tasks schedule(Tasks tasks) override;
 };
 
-class Opt2: IScheduler {
+class Opt2: public IScheduler {
 public:
     Tasks schedule(Tasks tasks) override;
 };
