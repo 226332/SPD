@@ -57,23 +57,24 @@ Tasks Shrage::schedule(Tasks tasks) {
     while (permutation.size() != tasks.size()) {
         Task best = takeLongestReadyTask(taskList, t);
         permutation.push_back(best);
-        t = t + best.p;
+        t += best.p;
     }
-    //for_each(permutation.begin(), permutation.end(), [](Task & task) {std::cout << task.q <<" ";}); //debug print
     return permutation;
 }
 
 Task Shrage::takeLongestReadyTask(std::list<Task>& tasks, size_t& t) {
-    static auto compareQ = [](const Task& task1, const Task& task2) {return task1.q+task1.p<task2.q+task2.p;};
+    static auto compareQ = [](const Task& task1, const Task& task2) {return task1.q + task1.p < task2.q + task2.p;};
     static std::priority_queue<Task, Tasks, decltype(compareQ)> readyTasks(compareQ);
-    for (auto i = tasks.begin(); i != tasks.end(); i++) {
+    for (auto i = tasks.rbegin(); i != tasks.rend(); i++) {
         if (i->r <= t)
             readyTasks.push(*i);
+        else
+            break;
     }
     tasks.remove_if([&t](Task& task)->bool {return (task.r <= t);});
     Task longestTask;
     if (readyTasks.empty() && !tasks.empty()) {
-        t = tasks.front().r;
+        t = tasks.back().r;
         longestTask = takeLongestReadyTask(tasks, t);
     } else {
         longestTask = readyTasks.top();
