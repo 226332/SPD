@@ -2,9 +2,9 @@
 #include "StandardIncludes.hpp"
 
 struct Task {
-    unsigned int r;
-    unsigned int p;
-    unsigned int q;
+    size_t r;
+    size_t p;
+    size_t q;
 };
 
 using Tasks = std::vector<Task>;

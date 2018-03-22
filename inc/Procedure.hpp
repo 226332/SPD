@@ -14,7 +14,7 @@ public:
     }
 
     void execute() {
-        scheduler->schedule(tasks);
+        std::cout<<"shrage: "<<calculateCmax(scheduler->schedule(tasks))<<std::endl;
     }
 
 private:

@@ -22,3 +22,10 @@ public:
     Tasks schedule(Tasks tasks) override;
 };
 
+class Shrage: public IScheduler {
+public:
+    Tasks schedule(Tasks tasks) override;
+private:
+    Task takeLongestReadyTask(std::list<Task>& tasks, size_t& t);
+};
+
