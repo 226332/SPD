@@ -7,6 +7,7 @@ public:
     virtual ~IScheduler() = default;
     virtual Tasks schedule(Tasks tasks) = 0;
 };
+
 class SchedulerFactory {
 public:
     std::unique_ptr<IScheduler> createScheduler(std::string schedulerName);
@@ -21,11 +22,3 @@ class Opt2: public IScheduler {
 public:
     Tasks schedule(Tasks tasks) override;
 };
-
-class Shrage: public IScheduler {
-public:
-    Tasks schedule(Tasks tasks) override;
-private:
-    Task takeLongestReadyTask(std::list<Task>& tasks, size_t& t);
-};
-

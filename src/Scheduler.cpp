@@ -1,5 +1,6 @@
 #include "../inc/Scheduler.hpp"
 #include "../inc/Cmax.hpp"
+#include "../inc/Shrage.hpp"
 Tasks SortR::schedule(Tasks tasks) {
     std::sort(tasks.begin(), tasks.end(), [](Task & task1, Task & task2)->bool {return task1.r<task2.r;});
     //for_each(tasks.begin(), tasks.end(), [](Task & task) {std::cout << task.r <<" ";}); //debug print
@@ -39,47 +40,11 @@ std::unique_ptr<IScheduler> SchedulerFactory::createScheduler(std::string schedu
         return std::unique_ptr < IScheduler > (new SortR());
     } else if (schedulerName == "shrage") {
         return std::unique_ptr < IScheduler > (new Shrage());
+    }else if (schedulerName == "shrageSplit") {
+        return std::unique_ptr < IScheduler > (new ShrageSplit());
     }
     throw std::runtime_error("Unknown scheduler: " + schedulerName);
 }
 
-Tasks Shrage::schedule(Tasks tasks) {
-    size_t t = 0; //t
-    // tasks is N here
-    Tasks permutation; //pi*
-    std::sort(tasks.begin(), tasks.end(), [](Task & task1, Task & task2)->bool {return task1.r>task2.r;}); //N = reverse sortR
 
-    t = tasks.back().r + tasks.back().p;
-    std::list<Task> taskList(tasks.begin(), tasks.end());
-    permutation.push_back(taskList.back());
-    taskList.pop_back();
 
-    while (permutation.size() != tasks.size()) {
-        Task best = takeLongestReadyTask(taskList, t);
-        permutation.push_back(best);
-        t += best.p;
-    }
-    return permutation;
-}
-
-Task Shrage::takeLongestReadyTask(std::list<Task>& tasks, size_t& t) {
-    static auto compareQ = [](const Task& task1, const Task& task2) {return task1.q + task1.p < task2.q + task2.p;};
-    static std::priority_queue<Task, Tasks, decltype(compareQ)> readyTasks(compareQ);
-    for (auto i = tasks.rbegin(); i != tasks.rend(); i++) {
-        if (i->r <= t)
-            readyTasks.push(*i);
-        else
-            break;
-    }
-    tasks.remove_if([&t](Task& task)->bool {return (task.r <= t);});
-    Task longestTask;
-    if (readyTasks.empty() && !tasks.empty()) {
-        t = tasks.back().r;
-        longestTask = takeLongestReadyTask(tasks, t);
-    } else {
-        longestTask = readyTasks.top();
-        readyTasks.pop();
-    }
-
-    return longestTask;
-}
