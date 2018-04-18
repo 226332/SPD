@@ -24,7 +24,6 @@ Tasks ShrageSplit::schedule(Tasks tasks) {
 
         permutation.push_back(best);
         t += best.p;
-
     }
     return permutation;
 }

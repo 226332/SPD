@@ -11,3 +11,7 @@ CMakeCache.txt
 vsgrbs.*
 *.sln
 .vs/
+*.project
+*.workspace
+*.codelite/
+.csv

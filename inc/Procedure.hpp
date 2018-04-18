@@ -10,11 +10,11 @@ public:
     Procedure() = delete;
 
     void prepare() {
-        tasks = readTaskFile(fileName);
+        tasks = readTaskFile<Task>(fileName);
     }
 
     void execute() {
-        std::cout<<"shrage: "<<calculateCmax(scheduler->schedule(tasks))<<std::endl;
+        std::cout<<calculateCmax(scheduler->schedule(tasks))<<std::endl;
     }
 
 private:
