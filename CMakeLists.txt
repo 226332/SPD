@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 SET(CMAKE_CXX_COMPILER clang)
-SET(CMAKE_CXX_FLAGS "-Wall -pedantic -std=c++17 -Wextra -lstdc++" )
+SET(CMAKE_CXX_FLAGS "-Wall -pedantic -std=c++17 -Wextra -lstdc++ -g" )
 project (main)
 include_directories(inc)
 file(GLOB SOURCES "src/*.cpp")
