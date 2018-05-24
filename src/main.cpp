@@ -2,11 +2,20 @@
 #include "../inc/CommandLineHandler.hpp"
 #include "../inc/Scheduler.hpp"
 #include "../inc/Witi.hpp"
-#include <bitset>
-int main(int argc, char* argv[]) {
+#include "../neh/TaskNeh.hpp"
+int main() {
     // CommandLineHandler::handleCommandLine(argc, argv);
 
-    TasksWiti tasks = readTaskFile<TaskWiti>("pliki/data10.txt");
-    int a = (1 << tasks.size()) - 1;
-    std::cout << calculateWiti(a, tasks) << std::endl;
+    std::cout << "ta001: " << nehBasic(readNehFile("ta001")) << std::endl;
+    std::cout << "ta005: " << nehBasic(readNehFile("ta005")) << std::endl;
+    std::cout << "ta010: " << nehBasic(readNehFile("ta010")) << std::endl;
+    std::cout << "ta020: " << nehBasic(readNehFile("ta020")) << std::endl;
+    std::cout << "ta025: " << nehBasic(readNehFile("ta025")) << std::endl;
+    std::cout << "ta030: " << nehBasic(readNehFile("ta100")) << std::endl;
+    std::cout << "ta050: " << nehBasic(readNehFile("ta050")) << std::endl;
+    std::cout << "ta075: " << nehBasic(readNehFile("ta075")) << std::endl;
+    std::cout << "ta090: " << nehBasic(readNehFile("ta090")) << std::endl;
+    std::cout << "ta100: " << nehBasic(readNehFile("ta100")) << std::endl;
+
+    return 0;
 }
