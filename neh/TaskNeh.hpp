@@ -1,5 +1,6 @@
 #pragma once
 #include "../inc/StandardIncludes.hpp"
+#include <cstring>
 #include <numeric>
 struct TaskNeh {
     std::vector<long> machines;
@@ -27,48 +28,89 @@ inline TasksNeh readNehFile(const std::string& fileName) {
 }
 
 inline long nehCMax(const TasksNeh& tasks) {
-    int numOfMachines = tasks[0].machines.size();
-    int numOfTasks = tasks.size();
-    std::vector<long> times(numOfMachines);
+    long machineEndTime[tasks.size()][tasks[0].machines.size()];
+    machineEndTime[0][0] = tasks[0].machines[0];
 
-    times[0] = tasks[0].machines[0];
-    for(int i = 1; i < numOfMachines; i++) { times[i] = tasks[0].machines[i] + times[i - 1]; }
+    for(size_t j = 1; j < tasks.size(); j++) {
+        machineEndTime[j][0] = tasks[j].machines[0] + machineEndTime[j - 1][0];
+    }
 
-    for(int i = 1; i < numOfTasks; i++) {
-        times[0] = tasks[i].machines[0];
-        for(int j = 1; j < numOfMachines; j++) {
-            if(times[j - 1] > times[j]) {
-                times[j] = times[j - 1] + tasks[i].machines[j];
-            } else {
-                times[j] = times[j] + tasks[i].machines[j];
-            }
+    for(size_t i = 1; i < tasks[0].machines.size(); i++) {
+        machineEndTime[0][i] = tasks[0].machines[i] + machineEndTime[0][i - 1];
+    }
+
+    for(size_t j = 1; j < tasks.size(); j++) {
+        for(size_t i = 1; i < tasks[0].machines.size(); i++) {
+            machineEndTime[j][i] = std::max(machineEndTime[j][i - 1], machineEndTime[j - 1][i])
+                + tasks[j].machines[i];
         }
     }
-    return times.back();
+    return machineEndTime[tasks.size() - 1][tasks[0].machines.size() - 1];
 }
 
-inline TaskNeh getLongestTask(std::list<TaskNeh>& tasks) {
+inline TaskNeh getShortestTask(std::list<TaskNeh>& tasks) {
     auto task = tasks.front();
     tasks.pop_front();
     return task;
 }
 
 inline void insertTaskToBestPosition(TasksNeh& permutation, const TaskNeh& task) {
-    long tentativePosition = 0;
+    long bestPosition = 0;
     long bestCMax = std::numeric_limits<decltype(bestCMax)>::max();
-    for(size_t i = 0; i != permutation.size(); i++) {
+    for(size_t i = 0; i < permutation.size() + 1; i++) {
         TasksNeh tentativePermutation(permutation);
-        tentativePermutation.insert(tentativePermutation.begin() + 1, task);
-        long cMax = nehCMax(permutation);
-        if(cMax <= bestCMax) {
+        tentativePermutation.insert(tentativePermutation.begin() + i, task);
+        long cMax = nehCMax(tentativePermutation);
+        if(cMax < bestCMax) {
             bestCMax = cMax;
-            tentativePosition = i;
+            bestPosition = i;
         }
     }
-    permutation.insert(permutation.begin() + tentativePosition, task);
+    permutation.insert(permutation.begin() + bestPosition, task);
+}
+
+inline TaskNeh pickTaskWithHighestCMax(TasksNeh& permutation, const TaskNeh& task) {
+    long bestPosition = 0;
+    long bestCMax = std::numeric_limits<decltype(bestCMax)>::max();
+    for(size_t i = 0; i < permutation.size(); i++) {
+        TasksNeh tentativePermutation(permutation);
+        tentativePermutation.erase(tentativePermutation.begin() + i);
+        long cMax = nehCMax(tentativePermutation);
+        if((cMax < bestCMax) && (task.machines != permutation[i].machines)) {
+            bestCMax = cMax;
+            bestPosition = i;
+        }
+    }
+    TaskNeh result = permutation[bestPosition];
+    permutation.erase(permutation.begin() + bestPosition);
+    return result;
 }
 
 inline long nehBasic(TasksNeh tasks) {
+    TasksNeh permutation;
+    permutation.reserve(tasks.size());
+    // Step 1: Sort the n jobs in non-increasing order of their total processing times
+
+    std::sort(tasks.begin(), tasks.end(), [](TaskNeh& a, TaskNeh& b) {
+        long aSum = std::accumulate(a.machines.begin(), a.machines.end(), 0);
+        long bSum = std::accumulate(b.machines.begin(), b.machines.end(), 0);
+        return aSum > bSum;
+    });
+    permutation.push_back(tasks[0]);
+
+    // Step 2: For k = 2 to n do Step 4
+    // Step 3: Insert the kth job at the place, which minimises the
+    // partial makespan among the k possible ones.
+
+    std::list<TaskNeh> remainingTasks(tasks.begin() + 1, tasks.end());
+    while(!remainingTasks.empty()) {
+        TaskNeh task = getShortestTask(remainingTasks);
+        insertTaskToBestPosition(permutation, task);
+    }
+    return nehCMax(permutation);
+}
+
+inline long nehMod(TasksNeh tasks) {
     TasksNeh permutation;
     permutation.reserve(tasks.size());
 
@@ -77,31 +119,24 @@ inline long nehBasic(TasksNeh tasks) {
     std::sort(tasks.begin(), tasks.end(), [](TaskNeh& a, TaskNeh& b) {
         long aSum = std::accumulate(a.machines.begin(), a.machines.end(), 0);
         long bSum = std::accumulate(b.machines.begin(), b.machines.end(), 0);
-        return aSum < bSum;
+        return aSum > bSum;
     });
+    permutation.push_back(tasks[0]);
 
-    // Step 2: Take the first two jobs and schedule them in order to minimise the
-    // partial makespan as if there were only these two jobs
-
-    TasksNeh permutation1 = { tasks[0], tasks[1] };
-    TasksNeh permutation2 = { tasks[1], tasks[0] };
-    long cMax1 = nehCMax(permutation1);
-    long cMax2 = nehCMax(permutation2);
-
-    if(cMax1 < cMax2)
-        permutation = permutation1;
-    else
-        permutation = permutation2;
-
-    // Step 3: For k = 3 to n do Step 4
-    // Step 4: Insert the kth job at the place, which minimises the
+    // Step 2: For k = 3 to n do Step 4
+    // Step 3: Insert the kth job at the place, which minimises the
     // partial makespan among the k possible ones.
 
-    std::list<TaskNeh> remainingTasks(tasks.begin() + 2, tasks.end());
+    std::list<TaskNeh> remainingTasks(tasks.begin() + 1, tasks.end());
     while(!remainingTasks.empty()) {
-        TaskNeh task = getLongestTask(remainingTasks);
+        TaskNeh task = getShortestTask(remainingTasks);
+        insertTaskToBestPosition(permutation, task);
+        // krok 5: wybierz zadanie x i wstaw zadanie x na x pozycjach i wybierz to o
+        // najmniejszej wartości Cmax, następnie wróć do kroku 3
+        // 4. Zadanie, którego usunięcie spowoduję najwieksze zmniejszenie wartości Cmax.
+        task = pickTaskWithHighestCMax(permutation, task);
         insertTaskToBestPosition(permutation, task);
     }
 
-    return nehCMax(tasks);
+    return nehCMax(permutation);
 }
